@@ -1,6 +1,7 @@
 package com.example.fragment;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
@@ -12,123 +13,151 @@ import androidx.viewpager.widget.ViewPager;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
 import com.example.fragment.databinding.ActivityMainBinding;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.navigation.NavigationBarView;
+import com.google.android.material.navigation.NavigationView;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 
-    ActivityMainBinding binding;
 
     BottomNavigationView bottomNavigationView;
 
     DrawerLayout drawerLayout;
     Toolbar toolbar;
+    FragmentManager fragmentManager;
 
-
+    NavigationView navigationView;
+    ActionBarDrawerToggle actionBarDrawerToggle;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        setControl();
-
-        setEvent();
-
-    }
-
-    private void setEvent() {
-
-        binding = ActivityMainBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
-        replaceFragment(new Fragment_home());
-        binding.idbottomNavigation.setSelectedItemId(R.id.menu_tap3);
-        binding.idbottomNavigation.setOnItemSelectedListener(item -> {
-            switch (item.getItemId())
-            {
-                case R.id.menu_tap1:
-                    replaceFragment(new Fragment_order());
-                    break;
-                case R.id.menu_tap2:
-                    replaceFragment(new Fagment_profile());
-                    break;
-                case R.id.menu_tap3:
-
-                    replaceFragment(new Fragment_home());
-
-                    break;
-                case R.id.menu_tap4:
-                    replaceFragment(new Fragment_wishlist());
-                    break;
-                case R.id.menu_tap5:
-                    replaceFragment(new Fragment_cart());
-                    break;
-
-            }
-
-                return true;
-        });
-
-//        setSupportActionBar(binding.toolbar);
-//        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-//        binding.toolbar.setNavigationIcon(android.R.drawable.ic_menu_sort_by_size);
-//        binding.toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                drawerLayout.openDrawer(GravityCompat.START);
-//            }
-//        });
-
-    }
-
-//    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//        getMenuInflater().inflate(R.menu.menu_drawer, menu);
-//        return super.onCreateOptionsMenu(menu);
-//    }
-//
-//    @Override
-//    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-//        int id = item.getItemId();
-//        if (id == R.id.Edit_profile) {
-//          replaceFragment(new Edit_profile());
-//        }
-//        else if(id == R.id.Transaction_history)
-//        {
-//            replaceFragment(new Transaction_history());
-//        }
-//        else if (id == R.id.Logout){
-//            finish();
-//        }
-//        drawerLayout.closeDrawer(GravityCompat.START);
-//        return true;
-//    }
-
-    private void setControl() {
-//        drawerLayout = findViewById(R.id.iddrawer);
+        drawerLayout = findViewById(R.id.idDrawer);
         toolbar = findViewById(R.id.toolbar);
-
         bottomNavigationView = findViewById(R.id.idbottomNavigation);
 
+        setSupportActionBar(toolbar);
+        actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawerLayout.addDrawerListener(actionBarDrawerToggle);
+        actionBarDrawerToggle.syncState();
+        navigationView = findViewById(R.id.id_navigationview);
+
+        navigationView.setNavigationItemSelectedListener(this);
+
+        bottomNavigationView.setBackground(null);
+
+
+        bottomNavigationView.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+
+               int idItem = item.getItemId();
+               if(idItem == R.id.menu_tap1)
+               {
+                   openFragment(new Fragment_order());
+                   Log.d("d", String.valueOf(fragmentManager.getBackStackEntryCount()));
+                   return true;
+               }
+                else if(idItem == R.id.menu_tap2)
+                {
+                    openFragment(new Fagment_profile());
+                    return true;
+                }
+               else if(idItem == R.id.menu_tap3)
+                {
+                    openFragment(new Fragment_home());
+                    return true;
+                }
+                else if(idItem == R.id.menu_tap4)
+                {
+                    openFragment(new Fragment_wishlist());
+                    return true;
+                }
+               else if(idItem == R.id.menu_tap5)
+               {
+                   openFragment(new Fragment_cart());
+                   return true;
+               }
+                return false;
+            }
+        });
+        fragmentManager = getSupportFragmentManager();
+
+        openFragment(new Fragment_home());
+
+        bottomNavigationView.setSelectedItemId(R.id.menu_tap3);
     }
-    private void replaceFragment(Fragment fragment)
-    {
 
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.framelayout, fragment);
-        fragmentTransaction.commit();
 
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        int idItem = item.getItemId();
+        if(idItem == R.id.Edit_profile){
+            openFragment(new Edit_profile());
+            bottomNavigationView.setVisibility(View.GONE);
+            toolbar.setTitle("Bla");
+            Log.d("d", String.valueOf(fragmentManager.getBackStackEntryCount()));
+        }
+        else if(idItem == R.id.Transaction_history)
+        {
+            openFragment(new Transaction_history());
+            bottomNavigationView.setVisibility(View.GONE);
+            Log.d("d", String.valueOf(fragmentManager.getBackStackEntryCount()));
+        }
+        else if(idItem == R.id.Logout)
+        {
+            finish();
+        }
+        drawerLayout.closeDrawer(GravityCompat.START);
+        actionBarDrawerToggle.setDrawerIndicatorEnabled(false);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        return true;
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int itemID = item.getItemId();
+        if (itemID == R.id.Edit_profile){
+            openFragment(new Fragment_home());
+            return true;
+        }
+        else if (itemID == R.id.Transaction_history)
+        {
+            openFragment(new Fragment_home());
+            return true;
+        }
+
+        // Xử lý các sự kiện khác ở đây nếu cần
+
+        return super.onOptionsItemSelected(item);
     }
 
-//    @Override
-//    public void onBackPressed() {
-//        if(binding.iddrawer.isDrawerOpen(GravityCompat.START))
-//        {
-//            binding.iddrawer.closeDrawer(GravityCompat.START);
-//        }
-//        super.onBackPressed();
-//    }
+
+    @Override
+    public void onBackPressed() {
+        if (drawerLayout.isDrawerOpen(GravityCompat.START))
+        {
+            drawerLayout.closeDrawer(GravityCompat.START);
+
+        }
+        else {
+
+           super.onBackPressed();
+            bottomNavigationView.setVisibility(View.VISIBLE);
+            actionBarDrawerToggle.setDrawerIndicatorEnabled(true);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+
+    }
+    private void openFragment(Fragment fragment){
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.replace(R.id.framelayout, fragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
+    }
 }
